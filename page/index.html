@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <title>Document</title>
+</head>
+<body>
+  <div id="app">
+    帳號 <input type="text" v-model="account">
+    <button @click="getTimeline">時光機</button>
+  </div>
+</body>
+
+<script>
+  var app = new Vue({
+    el:'#app',
+    data:{
+      account:"",
+      apiUrl:"http://localhost:3000/getTimeline"
+    },
+    methods:{
+      getTimeline() {
+        fetch(this.apiUrl,{
+          method: 'POST',
+          headers:{
+            'Content-Type':'application/json'
+          },
+          body:JSON.stringify({'account':this.account})
+        }).then((res) => {
+          return res.json()
+        }).then((json) => {
+          console.log(json)
+        })
+      }
+    }
+  })
+</script>
+</html>
