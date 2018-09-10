@@ -33,6 +33,8 @@
           return res.json()
         }).then((json) => {
           console.log(json)
+        }).catch((err) => {
+          console.log('錯誤:',err)
         })
       }
     }

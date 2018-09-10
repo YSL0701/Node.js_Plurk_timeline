@@ -14,6 +14,9 @@ app.post('/getTimeline', jsonParser, (req, res) => {
     return getTimeline(user_id)
   }).then((data) => {
     res.json(data)
+  }).catch((err) => {
+    console.log(err)
+    res.json({'response':err})
   })
 })
 
@@ -27,25 +30,27 @@ function getUid(account) {
     request({
       url: `https://www.plurk.com/${account}`,
       method: 'GET'
-    }, function(error, response, body) {
-      if(error || !body) {
-        reject();
-      }
+    }, function (error, response, body) {
       var $ = cheerio.load(body)
-      var user_id = $('.show_all_friends > a').attr('href').split('?')[1].split('&')[0].split('=')[1]
+      if (error || $('title').text()=='User Not Found! - Plurk') {
+        return reject('帳號不存在!')
+      }
+      var user_id = $('.show_all_friends > a').attr('href').split('=')[1].split('&')[0]
       resolve(user_id)
     })
   })
 }
 
 function getTimeline(user_id) {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     request({
       url: 'https://www.plurk.com/TimeLine/getPlurks',
       method: 'POST',
       formData: { only_user: 1, user_id: user_id }
     }, function (error, response, body) {
-      if (error || !body) { return; }
+      if (error || !body) {
+        return reject()
+      }
       // console.log(JSON.parse(b))
       resolve(JSON.parse(body))
     })
