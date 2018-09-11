@@ -8,7 +8,7 @@ var jsonParser = bodyParser.json()
 app.use(express.static('page'))
 app.use(jsonParser)
 
-app.post('/get/timeline', (req, res) => {
+app.post('/getTimeline', (req, res) => {
   console.log(req.body)
   getUid(req.body.account).then((user_id) => {
     return getTimeline(user_id, req.body.offset)
@@ -16,7 +16,7 @@ app.post('/get/timeline', (req, res) => {
     res.json(data)
   }).catch((err) => {
     console.log(err)
-    res.json({ response: { success: 'error', message: '帳號不存在!' } })
+    res.json({ success: 'error', message: err })
   })
 })
 
@@ -51,10 +51,8 @@ function getTimeline(user_id, offset) {
       if (error || !body) {
         return reject('發生錯誤')
       }
-      var response = {
-        response: JSON.parse(body)
-      }
-      response.response.success = 'success'
+      response = JSON.parse(body)
+      response.success = 'success'
       resolve(response)
     })
   })
