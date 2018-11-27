@@ -7,15 +7,17 @@ var jsonParser = bodyParser.json()
 var port = process.env.PORT || 3000
 
 app.use(express.static('static'))
+// app.use(express.static('dist'))
 app.use(jsonParser)
 
 app.post('/getTimeline', (req, res) => {
   console.log(req.body)
   getUid(req.body.account)
     .then(user_id => {
-      return getTimeline(user_id, req.body.offset)
+      return Promise.all([getTimeline(user_id, req.body.offset), getDisplayName(req.body.account)])
     })
     .then(data => {
+      newDate = [...data[0], ...data[1]]
       res.json(data)
     })
     .catch(err => {
@@ -65,6 +67,25 @@ function getTimeline(user_id, offset) {
         response = JSON.parse(body)
         response.success = 'success'
         resolve(response)
+      }
+    )
+  })
+}
+
+function getDisplayName(user_id) {
+  return new Promise((resolve, reject) => {
+    request(
+      {
+        url: `https://www.plurk.com/${user_id}`,
+        method: 'GET'
+      },
+      function(error, response, body) {
+        var $ = cheerio.load(body)
+        if (error || $('title').text() == 'User Not Found! - Plurk' || $('title').text() == 'Your life, on the line - Plurk') {
+          return reject('帳號不存在!!')
+        }
+        var displayName = $('.display_name').text()
+        resolve(displayName)
       }
     )
   })
