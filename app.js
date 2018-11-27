@@ -1,5 +1,6 @@
 var express = require('express')
 var app = express()
+var cors = require('cors')
 var request = require('request')
 var cheerio = require('cheerio')
 var bodyParser = require('body-parser')
@@ -9,16 +10,23 @@ var port = process.env.PORT || 3000
 app.use(express.static('static'))
 // app.use(express.static('dist'))
 app.use(jsonParser)
+const corsOptions = {
+  origin: ['http://localhost:3000', 'http://localhost:8080'],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS'
+}
+app.use(cors(corsOptions))
 
 app.post('/getTimeline', (req, res) => {
   console.log(req.body)
   getUid(req.body.account)
     .then(user_id => {
-      return Promise.all([getTimeline(user_id, req.body.offset), getDisplayName(req.body.account)])
+      return getTimeline(user_id, req.body.offset)
     })
     .then(data => {
-      newDate = [...data[0], ...data[1]]
-      res.json(data)
+      getDisplayName(req.body.account).then(displayName => {
+        data.displayName = displayName
+        res.json(data)
+      })
     })
     .catch(err => {
       console.log(err)
@@ -72,11 +80,11 @@ function getTimeline(user_id, offset) {
   })
 }
 
-function getDisplayName(user_id) {
+function getDisplayName(account) {
   return new Promise((resolve, reject) => {
     request(
       {
-        url: `https://www.plurk.com/${user_id}`,
+        url: `https://www.plurk.com/${account}`,
         method: 'GET'
       },
       function(error, response, body) {
