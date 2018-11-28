@@ -25,6 +25,7 @@ app.post('/getTimeline', (req, res) => {
     .then(data => {
       getDisplayName(req.body.account).then(displayName => {
         data.displayName = displayName
+        data.account = req.body.account
         res.json(data)
       })
     })
