@@ -7,8 +7,8 @@ var bodyParser = require('body-parser')
 var jsonParser = bodyParser.json()
 var port = process.env.PORT || 3000
 
-app.use(express.static('static'))
-// app.use(express.static('dist'))
+// app.use(express.static('static'))
+app.use(express.static('dist'))
 app.use(jsonParser)
 const corsOptions = {
   origin: ['http://localhost:3000', 'http://localhost:8080'],
