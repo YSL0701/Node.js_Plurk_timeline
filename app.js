@@ -34,6 +34,16 @@ app.post('/getTimeline', (req, res) => {
       res.json({ success: 'error', message: err })
     })
 })
+app.post('/reply', (req, res) => {
+  getReply(req.body.plurk_id)
+    .then(replyData => {
+      res.json({ reply: replyData, success: 'success' })
+    })
+    .catch(err => {
+      console.log(err)
+      res.json({ success: 'error', message: err })
+    })
+})
 
 app.listen(port, function() {
   console.log('sever啟動')
@@ -73,9 +83,9 @@ function getTimeline(user_id, offset) {
         if (error || !body) {
           return reject('發生錯誤')
         }
-        response = JSON.parse(body)
-        response.success = 'success'
-        resolve(response)
+        var responseData = JSON.parse(body)
+        responseData.success = 'success'
+        resolve(responseData)
       }
     )
   })
@@ -95,6 +105,33 @@ function getDisplayName(account) {
         }
         var displayName = $('.display_name').text()
         resolve(displayName)
+      }
+    )
+  })
+}
+
+function getReply(plurk_id) {
+  return new Promise((resolve, reject) => {
+    request(
+      {
+        url: 'https://www.plurk.com/Responses/get2',
+        method: 'POST',
+        formData: { from_response: 0, plurk_id }
+      },
+      function(error, response, body) {
+        if (error) {
+          return reject('發生錯誤')
+        }
+        var data = JSON.parse(body)
+        var replyUser = data.friends
+        var replyData = data.responses.map(reply => {
+          var uid = reply.user_id
+          reply.account = replyUser[uid].nick_name
+          reply.displayName = replyUser[uid].display_name
+          reply.nameColor = replyUser[uid].name_color
+          return reply
+        })
+        resolve(replyData)
       }
     )
   })
