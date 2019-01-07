@@ -124,8 +124,11 @@ function getReply(plurk_id) {
         }
         var data = JSON.parse(body)
         var replyUser = data.friends
-        var replyData = data.responses.map(reply => {
+        var replyData = data.responses.filter(reply => {
           var uid = reply.user_id
+          if (!replyUser[uid]) {
+            return false
+          }
           reply.account = replyUser[uid].nick_name
           reply.displayName = replyUser[uid].display_name
           reply.nameColor = replyUser[uid].name_color
