@@ -18,16 +18,20 @@ app.use(cors(corsOptions))
 
 app.post('/getTimeline', (req, res) => {
   console.log(req.body)
+  var data = {}
   getUid(req.body.account)
     .then(user_id => {
       return getTimeline(user_id, req.body.offset)
     })
-    .then(data => {
-      getDisplayName(req.body.account).then(displayName => {
-        data.displayName = displayName
-        data.account = req.body.account
-        res.json(data)
-      })
+    .then(responseData => {
+      data = responseData
+      return getDisplayName(req.body.account)
+    })
+    .then(({ displayName, targetAvatar }) => {
+      data.displayName = displayName
+      data.account = req.body.account
+      data.avatar = targetAvatar
+      res.json(data)
     })
     .catch(err => {
       console.log(err)
@@ -91,6 +95,7 @@ function getTimeline(user_id, offset) {
   })
 }
 
+//顯示名稱和大頭貼
 function getDisplayName(account) {
   return new Promise((resolve, reject) => {
     request(
@@ -104,7 +109,8 @@ function getDisplayName(account) {
           return reject('帳號不存在!!')
         }
         var displayName = $('.display_name').text()
-        resolve(displayName)
+        var targetAvatar = $('#profile_pic').attr('src')
+        resolve({ displayName, targetAvatar })
       }
     )
   })
@@ -131,6 +137,11 @@ function getReply(plurk_id) {
           }
           reply.account = replyUser[uid].nick_name
           reply.displayName = replyUser[uid].display_name
+          if (replyUser[uid].avatar) {
+            reply.avatar = `https://avatars.plurk.com/${uid}-medium${replyUser[uid].avatar}.gif`
+          } else {
+            reply.avatar = 'https://www.plurk.com/static/default_medium.gif'
+          }
           reply.nameColor = replyUser[uid].name_color
           return reply
         })
