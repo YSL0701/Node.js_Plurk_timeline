@@ -38,10 +38,10 @@ app.post('/getTimeline', (req, res) => {
       res.json({ success: 'error', message: err })
     })
 })
-app.post('/reply', (req, res) => {
-  getReply(req.body.plurk_id)
-    .then(replyData => {
-      res.json({ reply: replyData, success: 'success' })
+app.post('/response', (req, res) => {
+  getResponse(req.body.plurk_id)
+    .then(responseData => {
+      res.json({ response: responseData, success: 'success' })
     })
     .catch(err => {
       console.log(err)
@@ -81,7 +81,7 @@ function getTimeline(user_id, offset) {
       {
         url: 'https://www.plurk.com/TimeLine/getPlurks',
         method: 'POST',
-        formData: { only_user: 1, user_id: user_id, offset: offset }
+        formData: { only_user: 1, user_id, offset }
       },
       function(error, response, body) {
         if (error || !body) {
@@ -116,7 +116,7 @@ function getDisplayName(account) {
   })
 }
 
-function getReply(plurk_id) {
+function getResponse(plurk_id) {
   return new Promise((resolve, reject) => {
     request(
       {
@@ -129,23 +129,27 @@ function getReply(plurk_id) {
           return reject('發生錯誤')
         }
         var data = JSON.parse(body)
-        var replyUser = data.friends
-        var replyData = data.responses.filter(reply => {
-          var uid = reply.user_id
-          if (!replyUser[uid]) {
+        var responseUser = data.friends
+        var responseData = data.responses.filter(response => {
+          var uid = response.user_id
+          if (!responseUser[uid]) {
             return false
           }
-          reply.account = replyUser[uid].nick_name
-          reply.displayName = replyUser[uid].display_name
-          if (replyUser[uid].avatar) {
-            reply.avatar = `https://avatars.plurk.com/${uid}-medium${replyUser[uid].avatar}.gif`
+          response.account = responseUser[uid].nick_name
+          response.displayName = responseUser[uid].display_name
+          if (responseUser[uid].avatar) {
+            response.avatar = `https://avatars.plurk.com/${uid}-medium${responseUser[uid].avatar}.gif`
           } else {
-            reply.avatar = 'https://www.plurk.com/static/default_medium.gif'
+            response.avatar = 'https://www.plurk.com/static/default_medium.gif'
           }
-          reply.nameColor = replyUser[uid].name_color
-          return reply
+          if (!responseUser[uid].name_color) {
+            response.nameColor = '111'
+          } else {
+            response.nameColor = responseUser[uid].name_color
+          }
+          return response
         })
-        resolve(replyData)
+        resolve(responseData)
       }
     )
   })
