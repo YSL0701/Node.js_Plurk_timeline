@@ -88,6 +88,9 @@ function getTimeline(user_id, offset) {
           return reject('發生錯誤')
         }
         var responseData = JSON.parse(body)
+        if (responseData.error) {
+          return reject('該帳號時間軸目前為私密狀態')
+        }
         responseData.success = 'success'
         resolve(responseData)
       }
