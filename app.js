@@ -132,7 +132,7 @@ function getResponse(plurk_id) {
           return reject('發生錯誤')
         }
         var data = JSON.parse(body)
-        var responseUser = data.friends
+        var responseUser = data.users
         var responseData = data.responses.filter(response => {
           var uid = response.user_id
           if (!responseUser[uid]) {
@@ -157,3 +157,21 @@ function getResponse(plurk_id) {
     )
   })
 }
+
+// getOwnerContent(plurk_id){
+//   return new Promise((resolve,reject)=>{
+//     request(
+//       {
+//         url:`https://www.plurk.com/p/${plurk_id.toString(10)}`,
+//         method:'GET'
+//       },
+//       function(error,response,body){
+//         var $ = cheerio.load(body)
+//         if( error || !$('.permalink') ){
+//           reject('文章不存在')
+//         }
+//         $('')
+//       }
+//     )
+//   })
+// }
