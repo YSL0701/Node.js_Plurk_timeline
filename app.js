@@ -123,9 +123,9 @@ function getResponse(plurk_id) {
   return new Promise((resolve, reject) => {
     request(
       {
-        url: 'https://www.plurk.com/Responses/get2',
+        url: 'https://www.plurk.com/Responses/get',
         method: 'POST',
-        formData: { from_response: 0, plurk_id }
+        formData: { from_response_id: 0, plurk_id }
       },
       function(error, response, body) {
         if (error) {
