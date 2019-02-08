@@ -5,7 +5,6 @@ var bodyParser = require('body-parser')
 var jsonParser = bodyParser.json()
 var port = process.env.PORT || 3000
 var { getUid, getTimeline, getDisplayName, getResponse, getPlurkPageMainContent } = require('./main_function')
-// app.use(express.static('static'))
 app.use(express.static('dist'))
 app.use(jsonParser)
 const corsOptions = {
